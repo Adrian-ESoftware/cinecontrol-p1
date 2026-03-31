@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CineControl - Sessões Disponíveis</title>
+  <meta name="description" content="Visualize as sessões de cinema disponíveis no sistema CineControl.">
+  <link rel="stylesheet" href="css/bootstrap.min.css">
+  <style>
+    body {
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      min-height: 100vh;
+      color: #e0e0e0;
+    }
+    .navbar { background: rgba(15, 12, 41, 0.95) !important; backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.08); box-shadow: 0 2px 20px rgba(0,0,0,0.3); }
+    .navbar-brand { font-weight: 700; font-size: 1.4rem; background: linear-gradient(90deg, #f7971e, #ffd200); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 1px; }
+    .nav-link { color: rgba(255,255,255,0.75) !important; transition: color 0.3s ease; font-weight: 500; }
+    .nav-link:hover, .nav-link.active { color: #ffd200 !important; }
+    .container { margin-top: 90px; }
+    h4 { font-weight: 700; color: #ffd200; }
+    hr { border-color: rgba(255,255,255,0.1); }
+    .card-sessao {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+      overflow: hidden;
+    }
+    .card-sessao:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 12px 40px rgba(247,151,30,0.15);
+      border-color: rgba(247,151,30,0.3);
+    }
+    .card-sessao .card-body { padding: 24px; }
+    .card-sessao .card-title { font-weight: 700; color: #fff; font-size: 1.15rem; }
+    .card-sessao .card-text { color: rgba(255,255,255,0.55); font-size: 0.9rem; }
+    .card-sessao .badge-info { background: rgba(247,151,30,0.2); color: #ffd200; font-weight: 600; border-radius: 6px; padding: 4px 10px; }
+    .card-sessao .price-tag { font-size: 1.3rem; font-weight: 800; color: #6dd400; }
+    .btn-comprar {
+      background: linear-gradient(135deg, #f7971e, #ffd200); border: none; color: #1a1a2e; font-weight: 700; border-radius: 8px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .btn-comprar:hover { transform: scale(1.05); box-shadow: 0 4px 20px rgba(247,151,30,0.4); color: #1a1a2e; }
+    .empty-msg { text-align: center; color: rgba(255,255,255,0.4); font-size: 1.1rem; padding: 60px 0; }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="index.html">🎬 CineControl</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"><span class="navbar-toggler-icon"></span></button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="cadastro-filmes.html">Filmes</a></li>
+          <li class="nav-item"><a class="nav-link" href="cadastro-salas.html">Salas</a></li>
+          <li class="nav-item"><a class="nav-link" href="cadastro-sessoes.html">Sessões</a></li>
+          <li class="nav-item"><a class="nav-link" href="venda-ingressos.html">Venda de Ingressos</a></li>
+          <li class="nav-item"><a class="nav-link active" href="sessoes.html">Sessões Disponíveis</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <h4>📋 Sessões Disponíveis</h4>
+    <hr>
+
+    <div class="row g-4" id="containerSessoes">
+      <!-- Cards gerados dinamicamente -->
+    </div>
+  </div>
+
+  <script src="js/bootstrap.min.js"></script>
+  <script src="js-app/sessoes-lista.js"></script>
+</body>
+</html>

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CineControl - Cadastro de Filmes</title>
+  <meta name="description" content="Cadastro e gerenciamento de filmes no sistema CineControl.">
+  <link rel="stylesheet" href="css/bootstrap.min.css">
+  <style>
+    body {
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      min-height: 100vh;
+      color: #e0e0e0;
+    }
+    .navbar {
+      background: rgba(15, 12, 41, 0.95) !important;
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+    }
+    .navbar-brand { font-weight: 700; font-size: 1.4rem; background: linear-gradient(90deg, #f7971e, #ffd200); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 1px; }
+    .nav-link { color: rgba(255,255,255,0.75) !important; transition: color 0.3s ease; font-weight: 500; }
+    .nav-link:hover, .nav-link.active { color: #ffd200 !important; }
+    .container { margin-top: 90px; }
+    h4 { font-weight: 700; color: #ffd200; }
+    hr { border-color: rgba(255,255,255,0.1); }
+    .form-floating > .form-control, .form-floating > .form-select, .form-floating > textarea.form-control {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: #e0e0e0;
+      border-radius: 10px;
+    }
+    .form-floating > .form-control:focus, .form-floating > .form-select:focus, .form-floating > textarea.form-control:focus {
+      background: rgba(255,255,255,0.1);
+      border-color: #f7971e;
+      box-shadow: 0 0 0 0.2rem rgba(247, 151, 30, 0.25);
+      color: #fff;
+    }
+    .form-floating > label { color: rgba(255,255,255,0.5); }
+    .form-select option { background: #1a1a2e; color: #e0e0e0; }
+    .btn-primary {
+      background: linear-gradient(135deg, #f7971e, #ffd200);
+      border: none;
+      color: #1a1a2e;
+      font-weight: 700;
+      border-radius: 10px;
+      padding: 12px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .btn-primary:hover { transform: scale(1.02); box-shadow: 0 4px 20px rgba(247,151,30,0.4); color: #1a1a2e; background: linear-gradient(135deg, #f7971e, #ffd200); }
+    .table { color: #e0e0e0; background: transparent; --bs-table-bg: transparent; --bs-table-color: #e0e0e0; --bs-table-hover-bg: rgba(255,255,255,0.06); --bs-table-hover-color: #fff; --bs-table-striped-bg: transparent; border-color: rgba(255,255,255,0.08); }
+    .table thead { background: rgba(247,151,30,0.12); }
+    .table thead th { color: #ffd200; font-weight: 600; border-bottom: 2px solid rgba(247,151,30,0.3); background: transparent; }
+    .table tbody { background: rgba(255,255,255,0.03); }
+    .table tbody tr { border-bottom: 1px solid rgba(255,255,255,0.08); transition: background 0.2s; }
+    .table tbody tr:hover { background: rgba(247,151,30,0.08); }
+    .table td, .table th { vertical-align: middle; border-color: rgba(255,255,255,0.08); }
+    .table-responsive { background: rgba(0,0,0,0.2); border-radius: 12px; padding: 4px; border: 1px solid rgba(255,255,255,0.06); }
+    .btn-danger { border-radius: 8px; font-weight: 600; }
+    #mensagem { position: fixed; top: 80px; right: 20px; z-index: 1055; min-width: 280px; animation: fadeSlide 0.4s ease; }
+    @keyframes fadeSlide { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="index.html">🎬 CineControl</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"><span class="navbar-toggler-icon"></span></button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link active" href="cadastro-filmes.html">Filmes</a></li>
+          <li class="nav-item"><a class="nav-link" href="cadastro-salas.html">Salas</a></li>
+          <li class="nav-item"><a class="nav-link" href="cadastro-sessoes.html">Sessões</a></li>
+          <li class="nav-item"><a class="nav-link" href="venda-ingressos.html">Venda de Ingressos</a></li>
+          <li class="nav-item"><a class="nav-link" href="sessoes.html">Sessões Disponíveis</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <h4>🎞️ Cadastro de Filmes</h4>
+    <hr>
+
+    <div id="mensagem"></div>
+
+    <div class="row">
+      <div class="col-md-3"></div>
+      <div class="col-md-6">
+        <form id="formFilme">
+          <div class="form-floating mb-3">
+            <input type="text" class="form-control" id="titulo" placeholder="Título do filme" required>
+            <label for="titulo">Título</label>
+          </div>
+          <div class="form-floating mb-3">
+            <select class="form-select" id="genero" required>
+              <option value="" selected disabled>Selecione</option>
+              <option value="Ação">Ação</option>
+              <option value="Comédia">Comédia</option>
+              <option value="Drama">Drama</option>
+              <option value="Terror">Terror</option>
+              <option value="Animação">Animação</option>
+              <option value="Ficção Científica">Ficção Científica</option>
+              <option value="Romance">Romance</option>
+            </select>
+            <label for="genero">Gênero</label>
+          </div>
+          <div class="form-floating mb-3">
+            <textarea class="form-control" id="descricao" placeholder="Descrição" rows="3" style="height: 100px;"></textarea>
+            <label for="descricao">Descrição</label>
+          </div>
+          <div class="form-floating mb-3">
+            <select class="form-select" id="classificacao" required>
+              <option value="" selected disabled>Selecione</option>
+              <option value="Livre">Livre</option>
+              <option value="10 anos">10 anos</option>
+              <option value="12 anos">12 anos</option>
+              <option value="14 anos">14 anos</option>
+              <option value="16 anos">16 anos</option>
+              <option value="18 anos">18 anos</option>
+            </select>
+            <label for="classificacao">Classificação Indicativa</label>
+          </div>
+          <div class="form-floating mb-3">
+            <input type="number" class="form-control" id="duracao" placeholder="em minutos" required>
+            <label for="duracao">Duração (minutos)</label>
+          </div>
+          <div class="form-floating mb-3">
+            <input type="date" class="form-control" id="dataEstreia" required>
+            <label for="dataEstreia">Data de Estreia</label>
+          </div>
+          <div class="d-grid gap-2">
+            <button type="button" id="btnSalvarFilme" class="btn btn-primary">Salvar Filme</button>
+          </div>
+        </form>
+      </div>
+      <div class="col-md-3"></div>
+    </div>
+
+    <hr>
+
+    <div class="table-responsive">
+      <table class="table table-hover" id="tabelaFilmes">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Título</th>
+            <th>Gênero</th>
+            <th>Classificação</th>
+            <th>Duração</th>
+            <th>Estreia</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="js/bootstrap.min.js"></script>
+  <script src="js-app/filmes.js"></script>
+</body>
+</html>

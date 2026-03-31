@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CineControl - Venda de Ingressos</title>
+  <meta name="description" content="Venda de ingressos para sessões de cinema no sistema CineControl.">
+  <link rel="stylesheet" href="css/bootstrap.min.css">
+  <style>
+    body {
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      min-height: 100vh;
+      color: #e0e0e0;
+    }
+    .navbar { background: rgba(15, 12, 41, 0.95) !important; backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.08); box-shadow: 0 2px 20px rgba(0,0,0,0.3); }
+    .navbar-brand { font-weight: 700; font-size: 1.4rem; background: linear-gradient(90deg, #f7971e, #ffd200); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 1px; }
+    .nav-link { color: rgba(255,255,255,0.75) !important; transition: color 0.3s ease; font-weight: 500; }
+    .nav-link:hover, .nav-link.active { color: #ffd200 !important; }
+    .container { margin-top: 90px; }
+    h4 { font-weight: 700; color: #ffd200; }
+    hr { border-color: rgba(255,255,255,0.1); }
+    .form-floating > .form-control, .form-floating > .form-select {
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: #e0e0e0; border-radius: 10px;
+    }
+    .form-floating > .form-control:focus, .form-floating > .form-select:focus {
+      background: rgba(255,255,255,0.1); border-color: #28a745; box-shadow: 0 0 0 0.2rem rgba(40,167,69,0.25); color: #fff;
+    }
+    .form-floating > label { color: rgba(255,255,255,0.5); }
+    .form-select option { background: #1a1a2e; color: #e0e0e0; }
+    .btn-success {
+      background: linear-gradient(135deg, #28a745, #6dd400); border: none; color: #1a1a2e; font-weight: 700; border-radius: 10px; padding: 12px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .btn-success:hover { transform: scale(1.02); box-shadow: 0 4px 20px rgba(40,167,69,0.4); color: #1a1a2e; background: linear-gradient(135deg, #28a745, #6dd400); }
+    .table { color: #e0e0e0; background: transparent; --bs-table-bg: transparent; --bs-table-color: #e0e0e0; --bs-table-hover-bg: rgba(255,255,255,0.06); --bs-table-hover-color: #fff; --bs-table-striped-bg: transparent; border-color: rgba(255,255,255,0.08); }
+    .table thead { background: rgba(40,167,69,0.12); }
+    .table thead th { color: #6dd400; font-weight: 600; border-bottom: 2px solid rgba(40,167,69,0.3); background: transparent; }
+    .table tbody { background: rgba(255,255,255,0.03); }
+    .table tbody tr { border-bottom: 1px solid rgba(255,255,255,0.08); transition: background 0.2s; }
+    .table tbody tr:hover { background: rgba(40,167,69,0.08); }
+    .table td, .table th { vertical-align: middle; border-color: rgba(255,255,255,0.08); }
+    .table-responsive { background: rgba(0,0,0,0.2); border-radius: 12px; padding: 4px; border: 1px solid rgba(255,255,255,0.06); }
+    .btn-danger { border-radius: 8px; font-weight: 600; }
+    #mensagem { position: fixed; top: 80px; right: 20px; z-index: 1055; min-width: 280px; animation: fadeSlide 0.4s ease; }
+    @keyframes fadeSlide { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="index.html">🎬 CineControl</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"><span class="navbar-toggler-icon"></span></button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="cadastro-filmes.html">Filmes</a></li>
+          <li class="nav-item"><a class="nav-link" href="cadastro-salas.html">Salas</a></li>
+          <li class="nav-item"><a class="nav-link" href="cadastro-sessoes.html">Sessões</a></li>
+          <li class="nav-item"><a class="nav-link active" href="venda-ingressos.html">Venda de Ingressos</a></li>
+          <li class="nav-item"><a class="nav-link" href="sessoes.html">Sessões Disponíveis</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <h4>🎟️ Venda de Ingressos</h4>
+    <hr>
+
+    <div id="mensagem"></div>
+
+    <div class="row">
+      <div class="col-md-3"></div>
+      <div class="col-md-6">
+        <form id="formVenda">
+          <div class="form-floating mb-3">
+            <select class="form-select" id="selectSessao" required>
+              <option value="" selected disabled>Selecione uma sessão</option>
+            </select>
+            <label for="selectSessao">Sessão</label>
+          </div>
+          <div class="form-floating mb-3">
+            <input type="text" class="form-control" id="nomeCliente" placeholder="Nome do Cliente" required>
+            <label for="nomeCliente">Nome do Cliente</label>
+          </div>
+          <div class="form-floating mb-3">
+            <input type="text" class="form-control" id="cpf" placeholder="000.000.000-00" maxlength="14" oninput="this.value = this.value.replace(/\D/g,'').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d{1,2})$/,'$1-$2')" required>
+            <label for="cpf">CPF</label>
+          </div>
+          <div class="form-floating mb-3">
+            <input type="text" class="form-control" id="assento" placeholder="ex: A10" required>
+            <label for="assento">Assento</label>
+          </div>
+          <div class="form-floating mb-3">
+            <select class="form-select" id="tipoPagamento" required>
+              <option value="Cartão">Cartão</option>
+              <option value="Pix">Pix</option>
+              <option value="Dinheiro">Dinheiro</option>
+            </select>
+            <label for="tipoPagamento">Tipo de Pagamento</label>
+          </div>
+          <div class="d-grid gap-2">
+            <button type="button" id="btnConfirmarVenda" class="btn btn-success">Confirmar Venda</button>
+          </div>
+        </form>
+      </div>
+      <div class="col-md-3"></div>
+    </div>
+
+    <hr>
+
+    <div class="table-responsive">
+      <table class="table table-hover" id="tabelaIngressos">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Sessão</th>
+            <th>Cliente</th>
+            <th>CPF</th>
+            <th>Assento</th>
+            <th>Pagamento</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="js/bootstrap.min.js"></script>
+  <script src="js-app/venda.js"></script>
+</body>
+</html>
