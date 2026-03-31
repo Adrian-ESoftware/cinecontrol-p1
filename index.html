@@ -6,111 +6,25 @@
   <title>CineControl - Sistema de Controle de Cinema</title>
   <meta name="description" content="CineControl - Sistema completo de gerenciamento de cinema com cadastro de filmes, salas, sessões e venda de ingressos.">
   <link rel="stylesheet" href="css/bootstrap.min.css">
-  <style>
-    body {
-      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-      min-height: 100vh;
-      color: #e0e0e0;
-    }
-    .navbar {
-      background: rgba(15, 12, 41, 0.95) !important;
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
-    }
-    .navbar-brand {
-      font-weight: 700;
-      font-size: 1.4rem;
-      background: linear-gradient(90deg, #f7971e, #ffd200);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      letter-spacing: 1px;
-    }
-    .nav-link {
-      color: rgba(255, 255, 255, 0.75) !important;
-      transition: color 0.3s ease, transform 0.2s ease;
-      font-weight: 500;
-    }
-    .nav-link:hover, .nav-link.active {
-      color: #ffd200 !important;
-      transform: translateY(-1px);
-    }
-    .hero-section {
-      text-align: center;
-      padding: 60px 0 30px;
-    }
-    .hero-section h1 {
-      font-size: 2.8rem;
-      font-weight: 800;
-      background: linear-gradient(90deg, #f7971e, #ffd200, #f7971e);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin-bottom: 10px;
-    }
-    .hero-section p {
-      font-size: 1.1rem;
-      color: rgba(255, 255, 255, 0.6);
-      max-width: 500px;
-      margin: 0 auto;
-    }
-    .card-section {
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 16px;
-      transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
-      overflow: hidden;
-    }
-    .card-section:hover {
-      transform: translateY(-8px);
-      box-shadow: 0 12px 40px rgba(247, 151, 30, 0.15);
-      border-color: rgba(247, 151, 30, 0.3);
-    }
-    .card-section .card-body {
-      padding: 28px 24px;
-    }
-    .card-section .card-icon {
-      font-size: 2.8rem;
-      margin-bottom: 12px;
-      display: block;
-    }
-    .card-section .card-title {
-      font-weight: 700;
-      font-size: 1.15rem;
-      color: #fff;
-    }
-    .card-section .card-text {
-      color: rgba(255, 255, 255, 0.55);
-      font-size: 0.92rem;
-      line-height: 1.5;
-    }
-    .btn-access {
-      background: linear-gradient(135deg, #f7971e, #ffd200);
-      border: none;
-      color: #1a1a2e;
-      font-weight: 700;
-      border-radius: 8px;
-      padding: 8px 24px;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    .btn-access:hover {
-      transform: scale(1.05);
-      box-shadow: 0 4px 20px rgba(247, 151, 30, 0.4);
-      color: #1a1a2e;
-    }
-    .footer-text {
-      text-align: center;
-      color: rgba(255, 255, 255, 0.3);
-      font-size: 0.85rem;
-      padding: 40px 0 20px;
-    }
-  </style>
+  <link rel="stylesheet" href="css/cinecontrol.css">
 </head>
 <body>
+
+  <!-- Film strip decorations -->
+  <div class="film-strip-top"></div>
+  <div class="film-strip-bottom"></div>
+  <div class="curtain-decoration"></div>
+
+  <!-- Spotlight effects -->
+  <div class="spotlight-left"></div>
+  <div class="spotlight-right"></div>
 
   <!-- Navbar -->
   <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
     <div class="container-fluid">
-      <a class="navbar-brand" href="index.html">🎬 CineControl</a>
+      <a class="navbar-brand" href="index.html">
+        <span class="brand-icon">🎬</span> CineControl
+      </a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -120,26 +34,25 @@
           <li class="nav-item"><a class="nav-link" href="cadastro-filmes.html">Filmes</a></li>
           <li class="nav-item"><a class="nav-link" href="cadastro-salas.html">Salas</a></li>
           <li class="nav-item"><a class="nav-link" href="cadastro-sessoes.html">Sessões</a></li>
-          <li class="nav-item"><a class="nav-link" href="venda-ingressos.html">Venda de Ingressos</a></li>
-          <li class="nav-item"><a class="nav-link" href="sessoes.html">Sessões Disponíveis</a></li>
+          <li class="nav-item"><a class="nav-link" href="venda-ingressos.html">Ingressos</a></li>
+          <li class="nav-item"><a class="nav-link" href="sessoes.html">Em Cartaz</a></li>
         </ul>
       </div>
     </div>
   </nav>
 
   <!-- Hero -->
-  <div class="container" style="margin-top: 90px;">
+  <div class="container main-content">
     <div class="hero-section">
-      <h1>CineControl</h1>
-      <p>Sistema completo de gerenciamento de cinema. Cadastre filmes, salas, sessões e realize vendas de ingressos.</p>
+      <h1>Cine<span class="accent">Control</span></h1>
+      <p>O sistema completo para gerenciamento do seu cinema. Cadastre filmes, salas, sessões e realize vendas de ingressos com total controle.</p>
+      <hr class="hero-divider">
     </div>
-
-    <hr style="border-color: rgba(255,255,255,0.1);">
 
     <!-- Cards Grid -->
     <div class="row g-4 mt-2">
       <!-- Filmes -->
-      <div class="col-md-4">
+      <div class="col-md-4 animate-in">
         <div class="card card-section h-100">
           <div class="card-body text-center">
             <span class="card-icon">🎞️</span>
@@ -150,18 +63,18 @@
         </div>
       </div>
       <!-- Salas -->
-      <div class="col-md-4">
+      <div class="col-md-4 animate-in">
         <div class="card card-section h-100">
           <div class="card-body text-center">
             <span class="card-icon">🏛️</span>
-            <h5 class="card-title">Salas</h5>
+            <h5 class="card-title">Salas de Exibição</h5>
             <p class="card-text">Gerencie as salas de exibição, definindo capacidade e tipo de projeção disponível.</p>
             <a href="cadastro-salas.html" class="btn btn-access mt-2">Acessar</a>
           </div>
         </div>
       </div>
       <!-- Sessões -->
-      <div class="col-md-4">
+      <div class="col-md-4 animate-in">
         <div class="card card-section h-100">
           <div class="card-body text-center">
             <span class="card-icon">🗓️</span>
@@ -172,7 +85,7 @@
         </div>
       </div>
       <!-- Venda de Ingressos -->
-      <div class="col-md-4">
+      <div class="col-md-4 animate-in">
         <div class="card card-section h-100">
           <div class="card-body text-center">
             <span class="card-icon">🎟️</span>
@@ -183,11 +96,11 @@
         </div>
       </div>
       <!-- Sessões Disponíveis -->
-      <div class="col-md-4">
+      <div class="col-md-4 animate-in">
         <div class="card card-section h-100">
           <div class="card-body text-center">
-            <span class="card-icon">📋</span>
-            <h5 class="card-title">Sessões Disponíveis</h5>
+            <span class="card-icon">📽️</span>
+            <h5 class="card-title">Em Cartaz</h5>
             <p class="card-text">Visualize todas as sessões disponíveis e compre ingressos diretamente pelo painel.</p>
             <a href="sessoes.html" class="btn btn-access mt-2">Acessar</a>
           </div>
@@ -195,7 +108,9 @@
       </div>
     </div>
 
-    <p class="footer-text">CineControl &copy; 2026 — Sistema de Gerenciamento de Cinema</p>
+    <div class="footer-cinema">
+      <p><span class="footer-brand">CineControl</span> &copy; 2026 — Sistema de Gerenciamento de Cinema</p>
+    </div>
   </div>
 
   <script src="js/bootstrap.min.js"></script>

@@ -6,51 +6,21 @@
   <title>CineControl - Cadastro de Salas</title>
   <meta name="description" content="Cadastro e gerenciamento de salas no sistema CineControl.">
   <link rel="stylesheet" href="css/bootstrap.min.css">
-  <style>
-    body {
-      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-      min-height: 100vh;
-      color: #e0e0e0;
-    }
-    .navbar { background: rgba(15, 12, 41, 0.95) !important; backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.08); box-shadow: 0 2px 20px rgba(0,0,0,0.3); }
-    .navbar-brand { font-weight: 700; font-size: 1.4rem; background: linear-gradient(90deg, #f7971e, #ffd200); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 1px; }
-    .nav-link { color: rgba(255,255,255,0.75) !important; transition: color 0.3s ease; font-weight: 500; }
-    .nav-link:hover, .nav-link.active { color: #ffd200 !important; }
-    .container { margin-top: 90px; }
-    h4 { font-weight: 700; color: #ffd200; }
-    hr { border-color: rgba(255,255,255,0.1); }
-    .form-floating > .form-control, .form-floating > .form-select {
-      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: #e0e0e0; border-radius: 10px;
-    }
-    .form-floating > .form-control:focus, .form-floating > .form-select:focus {
-      background: rgba(255,255,255,0.1); border-color: #28a745; box-shadow: 0 0 0 0.2rem rgba(40,167,69,0.25); color: #fff;
-    }
-    .form-floating > label { color: rgba(255,255,255,0.5); }
-    .form-select option { background: #1a1a2e; color: #e0e0e0; }
-    .btn-success {
-      background: linear-gradient(135deg, #28a745, #6dd400);
-      border: none; color: #1a1a2e; font-weight: 700; border-radius: 10px; padding: 12px;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    .btn-success:hover { transform: scale(1.02); box-shadow: 0 4px 20px rgba(40,167,69,0.4); color: #1a1a2e; background: linear-gradient(135deg, #28a745, #6dd400); }
-    .table { color: #e0e0e0; background: transparent; --bs-table-bg: transparent; --bs-table-color: #e0e0e0; --bs-table-hover-bg: rgba(255,255,255,0.06); --bs-table-hover-color: #fff; --bs-table-striped-bg: transparent; border-color: rgba(255,255,255,0.08); }
-    .table thead { background: rgba(40,167,69,0.12); }
-    .table thead th { color: #6dd400; font-weight: 600; border-bottom: 2px solid rgba(40,167,69,0.3); background: transparent; }
-    .table tbody { background: rgba(255,255,255,0.03); }
-    .table tbody tr { border-bottom: 1px solid rgba(255,255,255,0.08); transition: background 0.2s; }
-    .table tbody tr:hover { background: rgba(40,167,69,0.08); }
-    .table td, .table th { vertical-align: middle; border-color: rgba(255,255,255,0.08); }
-    .table-responsive { background: rgba(0,0,0,0.2); border-radius: 12px; padding: 4px; border: 1px solid rgba(255,255,255,0.06); }
-    .btn-danger { border-radius: 8px; font-weight: 600; }
-    #mensagem { position: fixed; top: 80px; right: 20px; z-index: 1055; min-width: 280px; animation: fadeSlide 0.4s ease; }
-    @keyframes fadeSlide { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
-  </style>
+  <link rel="stylesheet" href="css/cinecontrol.css">
 </head>
 <body>
 
+  <!-- Film strip decorations -->
+  <div class="film-strip-top"></div>
+  <div class="film-strip-bottom"></div>
+  <div class="curtain-decoration"></div>
+
+  <!-- Navbar -->
   <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
     <div class="container-fluid">
-      <a class="navbar-brand" href="index.html">🎬 CineControl</a>
+      <a class="navbar-brand" href="index.html">
+        <span class="brand-icon">🎬</span> CineControl
+      </a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"><span class="navbar-toggler-icon"></span></button>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-auto">
@@ -58,51 +28,55 @@
           <li class="nav-item"><a class="nav-link" href="cadastro-filmes.html">Filmes</a></li>
           <li class="nav-item"><a class="nav-link active" href="cadastro-salas.html">Salas</a></li>
           <li class="nav-item"><a class="nav-link" href="cadastro-sessoes.html">Sessões</a></li>
-          <li class="nav-item"><a class="nav-link" href="venda-ingressos.html">Venda de Ingressos</a></li>
-          <li class="nav-item"><a class="nav-link" href="sessoes.html">Sessões Disponíveis</a></li>
+          <li class="nav-item"><a class="nav-link" href="venda-ingressos.html">Ingressos</a></li>
+          <li class="nav-item"><a class="nav-link" href="sessoes.html">Em Cartaz</a></li>
         </ul>
       </div>
     </div>
   </nav>
 
-  <div class="container">
-    <h4>🏛️ Cadastro de Salas</h4>
-    <hr>
+  <div class="container main-content">
+    <div class="page-header">
+      <h4><span class="page-icon">🏛️</span> Cadastro de Salas</h4>
+    </div>
+    <hr class="page-header-line">
 
     <div id="mensagem"></div>
 
     <div class="row">
       <div class="col-md-3"></div>
       <div class="col-md-6">
-        <form id="formSala">
-          <div class="form-floating mb-3">
-            <input type="text" class="form-control" id="nomeSala" placeholder="Nome da Sala" required>
-            <label for="nomeSala">Nome da Sala</label>
-          </div>
-          <div class="form-floating mb-3">
-            <input type="number" class="form-control" id="capacidade" placeholder="Capacidade" required>
-            <label for="capacidade">Capacidade</label>
-          </div>
-          <div class="form-floating mb-3">
-            <select class="form-select" id="tipoSala" required>
-              <option value="" selected disabled>Selecione</option>
-              <option value="2D">2D</option>
-              <option value="3D">3D</option>
-              <option value="IMAX">IMAX</option>
-            </select>
-            <label for="tipoSala">Tipo</label>
-          </div>
-          <div class="d-grid gap-2">
-            <button type="button" id="btnSalvarSala" class="btn btn-success">Salvar Sala</button>
-          </div>
-        </form>
+        <div class="form-card animate-in">
+          <form id="formSala">
+            <div class="form-floating mb-3">
+              <input type="text" class="form-control" id="nomeSala" placeholder="Nome da Sala" required>
+              <label for="nomeSala">Nome da Sala</label>
+            </div>
+            <div class="form-floating mb-3">
+              <input type="number" class="form-control" id="capacidade" placeholder="Capacidade" required>
+              <label for="capacidade">Capacidade</label>
+            </div>
+            <div class="form-floating mb-3">
+              <select class="form-select" id="tipoSala" required>
+                <option value="" selected disabled>Selecione</option>
+                <option value="2D">2D</option>
+                <option value="3D">3D</option>
+                <option value="IMAX">IMAX</option>
+              </select>
+              <label for="tipoSala">Tipo</label>
+            </div>
+            <div class="d-grid gap-2">
+              <button type="button" id="btnSalvarSala" class="btn btn-success">Salvar Sala</button>
+            </div>
+          </form>
+        </div>
       </div>
       <div class="col-md-3"></div>
     </div>
 
-    <hr>
+    <div class="ticket-divider"></div>
 
-    <div class="table-responsive">
+    <div class="table-responsive animate-in">
       <table class="table table-hover" id="tabelaSalas">
         <thead>
           <tr>
