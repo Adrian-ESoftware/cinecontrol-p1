@@ -27,7 +27,7 @@ class FilmeController {
     msgDiv.innerHTML = `<div class="alert alert-${tipo} alert-dismissible fade show" role="alert">${texto}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>`;
     setTimeout(() => {
       msgDiv.innerHTML = "";
-    }, 3000);
+    }, 4000);
   }
 
   salvar() {
@@ -79,17 +79,94 @@ class FilmeController {
   }
 
   excluir(index) {
-    const confirmado = confirm('Tem certeza que deseja excluir este filme? Esta ação não pode ser desfeita.');
+    // Contar dependentes para informar o usuário
+    const sessoes = JSON.parse(localStorage.getItem("sessoes")) || [];
+    const ingressos = JSON.parse(localStorage.getItem("ingressos")) || [];
+
+    // Sessões que referenciam este filme
+    const sessoesRelacionadas = [];
+    sessoes.forEach((sessao, i) => {
+      if (sessao.filmeIndex === index) {
+        sessoesRelacionadas.push(i);
+      }
+    });
+
+    // Ingressos que referenciam as sessões relacionadas
+    let ingressosRelacionados = 0;
+    ingressos.forEach((ingresso) => {
+      if (sessoesRelacionadas.includes(ingresso.sessaoIndex)) {
+        ingressosRelacionados++;
+      }
+    });
+
+    // Montar mensagem de confirmação
+    let msgConfirm = 'Tem certeza que deseja excluir este filme?';
+    if (sessoesRelacionadas.length > 0 || ingressosRelacionados > 0) {
+      msgConfirm += '\n\n⚠️ EXCLUSÃO ENCADEADA: Serão removidos também:';
+      if (sessoesRelacionadas.length > 0) {
+        msgConfirm += `\n  • ${sessoesRelacionadas.length} sessão(ões) vinculada(s)`;
+      }
+      if (ingressosRelacionados > 0) {
+        msgConfirm += `\n  • ${ingressosRelacionados} ingresso(s) vendido(s)`;
+      }
+    }
+    msgConfirm += '\n\nEsta ação não pode ser desfeita.';
+
+    const confirmado = confirm(msgConfirm);
     if (!confirmado) return;
 
-    const lista = JSON.parse(localStorage.getItem("filmes")) || [];
-    lista.splice(index, 1);
     try {
-      localStorage.setItem("filmes", JSON.stringify(lista));
-      this.mostrarMensagem("Filme excluído.", "warning");
+      // 1. Remover ingressos das sessões relacionadas e reajustar índices
+      let novaListaIngressos = ingressos.filter((ingresso) => {
+        return !sessoesRelacionadas.includes(ingresso.sessaoIndex);
+      });
+
+      // 2. Remover sessões relacionadas e reajustar índices
+      let novaListaSessoes = sessoes.filter((sessao) => {
+        return sessao.filmeIndex !== index;
+      });
+
+      // 3. Reajustar filmeIndex nas sessões restantes (índices acima do removido diminuem em 1)
+      novaListaSessoes.forEach((sessao) => {
+        if (sessao.filmeIndex > index) {
+          sessao.filmeIndex--;
+        }
+      });
+
+      // 4. Reajustar sessaoIndex nos ingressos restantes
+      // Criar mapa: índice antigo da sessão → índice novo
+      const mapaIndicesSessoes = {};
+      let novoIndiceSessao = 0;
+      sessoes.forEach((sessao, i) => {
+        if (!sessoesRelacionadas.includes(i)) {
+          mapaIndicesSessoes[i] = novoIndiceSessao;
+          novoIndiceSessao++;
+        }
+      });
+
+      novaListaIngressos.forEach((ingresso) => {
+        if (mapaIndicesSessoes[ingresso.sessaoIndex] !== undefined) {
+          ingresso.sessaoIndex = mapaIndicesSessoes[ingresso.sessaoIndex];
+        }
+      });
+
+      // 5. Remover o filme
+      const filmes = JSON.parse(localStorage.getItem("filmes")) || [];
+      filmes.splice(index, 1);
+
+      // 6. Salvar tudo no localStorage
+      localStorage.setItem("filmes", JSON.stringify(filmes));
+      localStorage.setItem("sessoes", JSON.stringify(novaListaSessoes));
+      localStorage.setItem("ingressos", JSON.stringify(novaListaIngressos));
+
+      let msgSucesso = "Filme excluído com sucesso.";
+      if (sessoesRelacionadas.length > 0 || ingressosRelacionados > 0) {
+        msgSucesso = `Filme excluído junto com ${sessoesRelacionadas.length} sessão(ões) e ${ingressosRelacionados} ingresso(s) relacionado(s).`;
+      }
+      this.mostrarMensagem(msgSucesso, "warning");
       this.atualizarTabela();
     } catch (e) {
-      this.mostrarMensagem("Erro ao salvar: armazenamento do navegador está cheio.", "danger");
+      this.mostrarMensagem("Erro ao excluir: " + e.message, "danger");
     }
   }
 }

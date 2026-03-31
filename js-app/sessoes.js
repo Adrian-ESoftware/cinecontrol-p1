@@ -28,7 +28,7 @@ class SessaoController {
     msgDiv.innerHTML = `<div class="alert alert-${tipo} alert-dismissible fade show" role="alert">${texto}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>`;
     setTimeout(() => {
       msgDiv.innerHTML = "";
-    }, 3000);
+    }, 4000);
   }
 
   carregarSelects() {
@@ -140,17 +140,55 @@ class SessaoController {
   }
 
   excluir(index) {
-    const confirmado = confirm('Tem certeza que deseja excluir esta sessão? Esta ação não pode ser desfeita.');
+    // Contar ingressos dependentes
+    const ingressos = JSON.parse(localStorage.getItem("ingressos")) || [];
+
+    let ingressosRelacionados = 0;
+    ingressos.forEach((ingresso) => {
+      if (ingresso.sessaoIndex === index) {
+        ingressosRelacionados++;
+      }
+    });
+
+    // Montar mensagem de confirmação
+    let msgConfirm = 'Tem certeza que deseja excluir esta sessão?';
+    if (ingressosRelacionados > 0) {
+      msgConfirm += `\n\n⚠️ EXCLUSÃO ENCADEADA: Serão removidos também:\n  • ${ingressosRelacionados} ingresso(s) vendido(s) para esta sessão`;
+    }
+    msgConfirm += '\n\nEsta ação não pode ser desfeita.';
+
+    const confirmado = confirm(msgConfirm);
     if (!confirmado) return;
 
-    const lista = JSON.parse(localStorage.getItem("sessoes")) || [];
-    lista.splice(index, 1);
     try {
-      localStorage.setItem("sessoes", JSON.stringify(lista));
-      this.mostrarMensagem("Sessão excluída.", "warning");
+      // 1. Remover ingressos desta sessão
+      let novaListaIngressos = ingressos.filter((ingresso) => {
+        return ingresso.sessaoIndex !== index;
+      });
+
+      // 2. Reajustar sessaoIndex nos ingressos restantes (índices acima do removido diminuem em 1)
+      novaListaIngressos.forEach((ingresso) => {
+        if (ingresso.sessaoIndex > index) {
+          ingresso.sessaoIndex--;
+        }
+      });
+
+      // 3. Remover a sessão
+      const sessoes = JSON.parse(localStorage.getItem("sessoes")) || [];
+      sessoes.splice(index, 1);
+
+      // 4. Salvar tudo no localStorage
+      localStorage.setItem("sessoes", JSON.stringify(sessoes));
+      localStorage.setItem("ingressos", JSON.stringify(novaListaIngressos));
+
+      let msgSucesso = "Sessão excluída com sucesso.";
+      if (ingressosRelacionados > 0) {
+        msgSucesso = `Sessão excluída junto com ${ingressosRelacionados} ingresso(s) relacionado(s).`;
+      }
+      this.mostrarMensagem(msgSucesso, "warning");
       this.atualizarTabela();
     } catch (e) {
-      this.mostrarMensagem("Erro ao salvar: armazenamento do navegador está cheio.", "danger");
+      this.mostrarMensagem("Erro ao excluir: " + e.message, "danger");
     }
   }
 }
