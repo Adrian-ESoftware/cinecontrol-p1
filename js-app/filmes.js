@@ -47,11 +47,14 @@ class FilmeController {
 
     const lista = JSON.parse(localStorage.getItem("filmes")) || [];
     lista.push(filme);
-    localStorage.setItem("filmes", JSON.stringify(lista));
-
-    this.mostrarMensagem("Filme cadastrado com sucesso!", "success");
-    document.getElementById("formFilme").reset();
-    this.atualizarTabela();
+    try {
+      localStorage.setItem("filmes", JSON.stringify(lista));
+      this.mostrarMensagem("Filme cadastrado com sucesso!", "success");
+      document.getElementById("formFilme").reset();
+      this.atualizarTabela();
+    } catch (e) {
+      this.mostrarMensagem("Erro ao salvar: armazenamento do navegador está cheio.", "danger");
+    }
   }
 
   atualizarTabela() {
@@ -81,9 +84,13 @@ class FilmeController {
 
     const lista = JSON.parse(localStorage.getItem("filmes")) || [];
     lista.splice(index, 1);
-    localStorage.setItem("filmes", JSON.stringify(lista));
-    this.mostrarMensagem("Filme excluído.", "warning");
-    this.atualizarTabela();
+    try {
+      localStorage.setItem("filmes", JSON.stringify(lista));
+      this.mostrarMensagem("Filme excluído.", "warning");
+      this.atualizarTabela();
+    } catch (e) {
+      this.mostrarMensagem("Erro ao salvar: armazenamento do navegador está cheio.", "danger");
+    }
   }
 }
 

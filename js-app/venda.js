@@ -97,11 +97,14 @@ class VendaController {
 
     const lista = JSON.parse(localStorage.getItem("ingressos")) || [];
     lista.push(ingresso);
-    localStorage.setItem("ingressos", JSON.stringify(lista));
-
-    this.mostrarMensagem("Ingresso vendido com sucesso!", "success");
-    document.getElementById("formVenda").reset();
-    this.atualizarTabela();
+    try {
+      localStorage.setItem("ingressos", JSON.stringify(lista));
+      this.mostrarMensagem("Ingresso vendido com sucesso!", "success");
+      document.getElementById("formVenda").reset();
+      this.atualizarTabela();
+    } catch (e) {
+      this.mostrarMensagem("Erro ao salvar: armazenamento do navegador está cheio.", "danger");
+    }
   }
 
   atualizarTabela() {
@@ -141,9 +144,13 @@ class VendaController {
 
     const lista = JSON.parse(localStorage.getItem("ingressos")) || [];
     lista.splice(index, 1);
-    localStorage.setItem("ingressos", JSON.stringify(lista));
-    this.mostrarMensagem("Ingresso excluído.", "warning");
-    this.atualizarTabela();
+    try {
+      localStorage.setItem("ingressos", JSON.stringify(lista));
+      this.mostrarMensagem("Ingresso excluído.", "warning");
+      this.atualizarTabela();
+    } catch (e) {
+      this.mostrarMensagem("Erro ao salvar: armazenamento do navegador está cheio.", "danger");
+    }
   }
 }
 

@@ -99,11 +99,14 @@ class SessaoController {
 
     const lista = JSON.parse(localStorage.getItem("sessoes")) || [];
     lista.push(sessao);
-    localStorage.setItem("sessoes", JSON.stringify(lista));
-
-    this.mostrarMensagem("Sessão cadastrada com sucesso!", "success");
-    document.getElementById("formSessao").reset();
-    this.atualizarTabela();
+    try {
+      localStorage.setItem("sessoes", JSON.stringify(lista));
+      this.mostrarMensagem("Sessão cadastrada com sucesso!", "success");
+      document.getElementById("formSessao").reset();
+      this.atualizarTabela();
+    } catch (e) {
+      this.mostrarMensagem("Erro ao salvar: armazenamento do navegador está cheio.", "danger");
+    }
   }
 
   atualizarTabela() {
@@ -142,9 +145,13 @@ class SessaoController {
 
     const lista = JSON.parse(localStorage.getItem("sessoes")) || [];
     lista.splice(index, 1);
-    localStorage.setItem("sessoes", JSON.stringify(lista));
-    this.mostrarMensagem("Sessão excluída.", "warning");
-    this.atualizarTabela();
+    try {
+      localStorage.setItem("sessoes", JSON.stringify(lista));
+      this.mostrarMensagem("Sessão excluída.", "warning");
+      this.atualizarTabela();
+    } catch (e) {
+      this.mostrarMensagem("Erro ao salvar: armazenamento do navegador está cheio.", "danger");
+    }
   }
 }
 

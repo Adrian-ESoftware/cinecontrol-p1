@@ -41,11 +41,14 @@ class SalaController {
 
     const lista = JSON.parse(localStorage.getItem("salas")) || [];
     lista.push(sala);
-    localStorage.setItem("salas", JSON.stringify(lista));
-
-    this.mostrarMensagem("Sala cadastrada com sucesso!", "success");
-    document.getElementById("formSala").reset();
-    this.atualizarTabela();
+    try {
+      localStorage.setItem("salas", JSON.stringify(lista));
+      this.mostrarMensagem("Sala cadastrada com sucesso!", "success");
+      document.getElementById("formSala").reset();
+      this.atualizarTabela();
+    } catch (e) {
+      this.mostrarMensagem("Erro ao salvar: armazenamento do navegador está cheio.", "danger");
+    }
   }
 
   atualizarTabela() {
@@ -72,9 +75,13 @@ class SalaController {
 
     const lista = JSON.parse(localStorage.getItem("salas")) || [];
     lista.splice(index, 1);
-    localStorage.setItem("salas", JSON.stringify(lista));
-    this.mostrarMensagem("Sala excluída.", "warning");
-    this.atualizarTabela();
+    try {
+      localStorage.setItem("salas", JSON.stringify(lista));
+      this.mostrarMensagem("Sala excluída.", "warning");
+      this.atualizarTabela();
+    } catch (e) {
+      this.mostrarMensagem("Erro ao salvar: armazenamento do navegador está cheio.", "danger");
+    }
   }
 }
 
