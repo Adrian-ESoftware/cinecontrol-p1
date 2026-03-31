@@ -12,6 +12,7 @@ class Filme {
 class FilmeController {
   constructor() {
     this.filmes = [];
+    this.editIndex = null;
     this.init();
   }
 
@@ -19,6 +20,18 @@ class FilmeController {
     document.getElementById("btnSalvarFilme").addEventListener("click", () => {
       this.salvar();
     });
+
+    // Criar botão cancelar dinamicamente
+    const btnSalvar = document.getElementById("btnSalvarFilme");
+    const btnCancelar = document.createElement("button");
+    btnCancelar.type = "button";
+    btnCancelar.id = "btnCancelarFilme";
+    btnCancelar.className = "btn btn-outline-secondary";
+    btnCancelar.textContent = "Cancelar Edição";
+    btnCancelar.style.display = "none";
+    btnCancelar.addEventListener("click", () => this.cancelarEdicao());
+    btnSalvar.parentElement.appendChild(btnCancelar);
+
     this.atualizarTabela();
   }
 
@@ -44,12 +57,21 @@ class FilmeController {
     }
 
     const filme = new Filme(titulo, genero, descricao, classificacao, duracao, dataEstreia);
-
     const lista = JSON.parse(localStorage.getItem("filmes")) || [];
-    lista.push(filme);
+
     try {
-      localStorage.setItem("filmes", JSON.stringify(lista));
-      this.mostrarMensagem("Filme cadastrado com sucesso!", "success");
+      if (this.editIndex !== null) {
+        // Modo edição — atualizar registro existente
+        lista[this.editIndex] = filme;
+        localStorage.setItem("filmes", JSON.stringify(lista));
+        this.mostrarMensagem("Filme atualizado com sucesso!", "success");
+        this.cancelarEdicao();
+      } else {
+        // Modo criação — adicionar novo
+        lista.push(filme);
+        localStorage.setItem("filmes", JSON.stringify(lista));
+        this.mostrarMensagem("Filme cadastrado com sucesso!", "success");
+      }
       document.getElementById("formFilme").reset();
       this.atualizarTabela();
     } catch (e) {
@@ -64,6 +86,7 @@ class FilmeController {
 
     lista.forEach((filme, index) => {
       const tr = document.createElement("tr");
+      if (this.editIndex === index) tr.classList.add("table-active");
       const dataFormatada = filme.dataEstreia ? new Date(filme.dataEstreia + "T00:00:00").toLocaleDateString("pt-BR") : "—";
       tr.innerHTML = `
         <td>${index + 1}</td>
@@ -72,18 +95,69 @@ class FilmeController {
         <td>${filme.classificacao}</td>
         <td>${filme.duracao} min</td>
         <td>${dataFormatada}</td>
-        <td><button class="btn btn-danger btn-sm" onclick="controller.excluir(${index})">Excluir</button></td>
+        <td>
+          <button class="btn btn-warning btn-sm me-1" onclick="controller.editar(${index})">Editar</button>
+          <button class="btn btn-danger btn-sm" onclick="controller.excluir(${index})">Excluir</button>
+        </td>
       `;
       tbody.appendChild(tr);
     });
   }
 
+  editar(index) {
+    const lista = JSON.parse(localStorage.getItem("filmes")) || [];
+    const filme = lista[index];
+    if (!filme) return;
+
+    this.editIndex = index;
+
+    // Preencher o formulário com os dados
+    document.getElementById("titulo").value = filme.titulo;
+    document.getElementById("genero").value = filme.genero;
+    document.getElementById("descricao").value = filme.descricao || "";
+    document.getElementById("classificacao").value = filme.classificacao;
+    document.getElementById("duracao").value = filme.duracao;
+    document.getElementById("dataEstreia").value = filme.dataEstreia;
+
+    // Alterar visual para modo edição
+    const btnSalvar = document.getElementById("btnSalvarFilme");
+    btnSalvar.textContent = "Atualizar Filme";
+    btnSalvar.classList.remove("btn-primary");
+    btnSalvar.classList.add("btn-warning");
+
+    document.getElementById("btnCancelarFilme").style.display = "block";
+
+    // Destacar a linha na tabela
+    this.atualizarTabela();
+
+    // Scroll para o formulário
+    document.getElementById("formFilme").scrollIntoView({ behavior: "smooth", block: "center" });
+    document.getElementById("titulo").focus();
+  }
+
+  cancelarEdicao() {
+    this.editIndex = null;
+    document.getElementById("formFilme").reset();
+
+    const btnSalvar = document.getElementById("btnSalvarFilme");
+    btnSalvar.textContent = "Salvar Filme";
+    btnSalvar.classList.remove("btn-warning");
+    btnSalvar.classList.add("btn-primary");
+
+    document.getElementById("btnCancelarFilme").style.display = "none";
+    this.atualizarTabela();
+  }
+
   excluir(index) {
-    // Contar dependentes para informar o usuário
+    // Não permitir excluir enquanto edita
+    if (this.editIndex !== null) {
+      this.mostrarMensagem("Cancele a edição antes de excluir.", "danger");
+      return;
+    }
+
     const sessoes = JSON.parse(localStorage.getItem("sessoes")) || [];
     const ingressos = JSON.parse(localStorage.getItem("ingressos")) || [];
 
-    // Sessões que referenciam este filme
     const sessoesRelacionadas = [];
     sessoes.forEach((sessao, i) => {
       if (sessao.filmeIndex === index) {
@@ -91,7 +165,6 @@ class FilmeController {
       }
     });
 
-    // Ingressos que referenciam as sessões relacionadas
     let ingressosRelacionados = 0;
     ingressos.forEach((ingresso) => {
       if (sessoesRelacionadas.includes(ingresso.sessaoIndex)) {
@@ -99,7 +172,6 @@ class FilmeController {
       }
     });
 
-    // Montar mensagem de confirmação
     let msgConfirm = 'Tem certeza que deseja excluir este filme?';
     if (sessoesRelacionadas.length > 0 || ingressosRelacionados > 0) {
       msgConfirm += '\n\n⚠️ EXCLUSÃO ENCADEADA: Serão removidos também:';
@@ -116,25 +188,20 @@ class FilmeController {
     if (!confirmado) return;
 
     try {
-      // 1. Remover ingressos das sessões relacionadas e reajustar índices
       let novaListaIngressos = ingressos.filter((ingresso) => {
         return !sessoesRelacionadas.includes(ingresso.sessaoIndex);
       });
 
-      // 2. Remover sessões relacionadas e reajustar índices
       let novaListaSessoes = sessoes.filter((sessao) => {
         return sessao.filmeIndex !== index;
       });
 
-      // 3. Reajustar filmeIndex nas sessões restantes (índices acima do removido diminuem em 1)
       novaListaSessoes.forEach((sessao) => {
         if (sessao.filmeIndex > index) {
           sessao.filmeIndex--;
         }
       });
 
-      // 4. Reajustar sessaoIndex nos ingressos restantes
-      // Criar mapa: índice antigo da sessão → índice novo
       const mapaIndicesSessoes = {};
       let novoIndiceSessao = 0;
       sessoes.forEach((sessao, i) => {
@@ -150,11 +217,9 @@ class FilmeController {
         }
       });
 
-      // 5. Remover o filme
       const filmes = JSON.parse(localStorage.getItem("filmes")) || [];
       filmes.splice(index, 1);
 
-      // 6. Salvar tudo no localStorage
       localStorage.setItem("filmes", JSON.stringify(filmes));
       localStorage.setItem("sessoes", JSON.stringify(novaListaSessoes));
       localStorage.setItem("ingressos", JSON.stringify(novaListaIngressos));

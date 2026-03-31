@@ -12,6 +12,7 @@ class Sessao {
 class SessaoController {
   constructor() {
     this.sessoes = [];
+    this.editIndex = null;
     this.init();
   }
 
@@ -20,6 +21,18 @@ class SessaoController {
     document.getElementById("btnSalvarSessao").addEventListener("click", () => {
       this.salvar();
     });
+
+    // Criar botão cancelar dinamicamente
+    const btnSalvar = document.getElementById("btnSalvarSessao");
+    const btnCancelar = document.createElement("button");
+    btnCancelar.type = "button";
+    btnCancelar.id = "btnCancelarSessao";
+    btnCancelar.className = "btn btn-outline-secondary";
+    btnCancelar.textContent = "Cancelar Edição";
+    btnCancelar.style.display = "none";
+    btnCancelar.addEventListener("click", () => this.cancelarEdicao());
+    btnSalvar.parentElement.appendChild(btnCancelar);
+
     this.atualizarTabela();
   }
 
@@ -36,7 +49,6 @@ class SessaoController {
     const salas = JSON.parse(localStorage.getItem("salas")) || [];
 
     const selectFilme = document.getElementById("selectFilme");
-    // Limpar options existentes exceto a primeira (placeholder)
     while (selectFilme.options.length > 1) {
       selectFilme.remove(1);
     }
@@ -98,10 +110,18 @@ class SessaoController {
     );
 
     const lista = JSON.parse(localStorage.getItem("sessoes")) || [];
-    lista.push(sessao);
+
     try {
-      localStorage.setItem("sessoes", JSON.stringify(lista));
-      this.mostrarMensagem("Sessão cadastrada com sucesso!", "success");
+      if (this.editIndex !== null) {
+        lista[this.editIndex] = sessao;
+        localStorage.setItem("sessoes", JSON.stringify(lista));
+        this.mostrarMensagem("Sessão atualizada com sucesso!", "success");
+        this.cancelarEdicao();
+      } else {
+        lista.push(sessao);
+        localStorage.setItem("sessoes", JSON.stringify(lista));
+        this.mostrarMensagem("Sessão cadastrada com sucesso!", "success");
+      }
       document.getElementById("formSessao").reset();
       this.atualizarTabela();
     } catch (e) {
@@ -125,6 +145,7 @@ class SessaoController {
       const precoFormatado = parseFloat(sessao.preco).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
       const tr = document.createElement("tr");
+      if (this.editIndex === index) tr.classList.add("table-active");
       tr.innerHTML = `
         <td>${index + 1}</td>
         <td>${nomeFilme}</td>
@@ -133,14 +154,65 @@ class SessaoController {
         <td>${precoFormatado}</td>
         <td>${sessao.idioma}</td>
         <td>${sessao.formato}</td>
-        <td><button class="btn btn-danger btn-sm" onclick="controller.excluir(${index})">Excluir</button></td>
+        <td>
+          <button class="btn btn-warning btn-sm me-1" onclick="controller.editar(${index})">Editar</button>
+          <button class="btn btn-danger btn-sm" onclick="controller.excluir(${index})">Excluir</button>
+        </td>
       `;
       tbody.appendChild(tr);
     });
   }
 
+  editar(index) {
+    const lista = JSON.parse(localStorage.getItem("sessoes")) || [];
+    const sessao = lista[index];
+    if (!sessao) return;
+
+    this.editIndex = index;
+
+    // Recarregar selects para garantir opções atualizadas
+    this.carregarSelects();
+
+    // Preencher o formulário com os dados da sessão
+    document.getElementById("selectFilme").value = sessao.filmeIndex;
+    document.getElementById("selectSala").value = sessao.salaIndex;
+    document.getElementById("dataHora").value = sessao.dataHora;
+    document.getElementById("preco").value = sessao.preco;
+    document.getElementById("idioma").value = sessao.idioma;
+    document.getElementById("formato").value = sessao.formato;
+
+    const btnSalvar = document.getElementById("btnSalvarSessao");
+    btnSalvar.textContent = "Atualizar Sessão";
+    btnSalvar.classList.remove("btn-primary");
+    btnSalvar.classList.add("btn-warning");
+
+    document.getElementById("btnCancelarSessao").style.display = "block";
+
+    this.atualizarTabela();
+
+    document.getElementById("formSessao").scrollIntoView({ behavior: "smooth", block: "center" });
+    document.getElementById("selectFilme").focus();
+  }
+
+  cancelarEdicao() {
+    this.editIndex = null;
+    document.getElementById("formSessao").reset();
+
+    const btnSalvar = document.getElementById("btnSalvarSessao");
+    btnSalvar.textContent = "Salvar Sessão";
+    btnSalvar.classList.remove("btn-warning");
+    btnSalvar.classList.add("btn-primary");
+
+    document.getElementById("btnCancelarSessao").style.display = "none";
+    this.atualizarTabela();
+  }
+
   excluir(index) {
-    // Contar ingressos dependentes
+    if (this.editIndex !== null) {
+      this.mostrarMensagem("Cancele a edição antes de excluir.", "danger");
+      return;
+    }
+
     const ingressos = JSON.parse(localStorage.getItem("ingressos")) || [];
 
     let ingressosRelacionados = 0;
@@ -150,7 +222,6 @@ class SessaoController {
       }
     });
 
-    // Montar mensagem de confirmação
     let msgConfirm = 'Tem certeza que deseja excluir esta sessão?';
     if (ingressosRelacionados > 0) {
       msgConfirm += `\n\n⚠️ EXCLUSÃO ENCADEADA: Serão removidos também:\n  • ${ingressosRelacionados} ingresso(s) vendido(s) para esta sessão`;
@@ -161,23 +232,19 @@ class SessaoController {
     if (!confirmado) return;
 
     try {
-      // 1. Remover ingressos desta sessão
       let novaListaIngressos = ingressos.filter((ingresso) => {
         return ingresso.sessaoIndex !== index;
       });
 
-      // 2. Reajustar sessaoIndex nos ingressos restantes (índices acima do removido diminuem em 1)
       novaListaIngressos.forEach((ingresso) => {
         if (ingresso.sessaoIndex > index) {
           ingresso.sessaoIndex--;
         }
       });
 
-      // 3. Remover a sessão
       const sessoes = JSON.parse(localStorage.getItem("sessoes")) || [];
       sessoes.splice(index, 1);
 
-      // 4. Salvar tudo no localStorage
       localStorage.setItem("sessoes", JSON.stringify(sessoes));
       localStorage.setItem("ingressos", JSON.stringify(novaListaIngressos));
 

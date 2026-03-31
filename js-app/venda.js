@@ -11,6 +11,7 @@ class Ingresso {
 class VendaController {
   constructor() {
     this.ingressos = [];
+    this.editIndex = null;
     this.init();
   }
 
@@ -29,6 +30,17 @@ class VendaController {
       this.salvar();
     });
 
+    // Criar botão cancelar dinamicamente
+    const btnSalvar = document.getElementById("btnConfirmarVenda");
+    const btnCancelar = document.createElement("button");
+    btnCancelar.type = "button";
+    btnCancelar.id = "btnCancelarVenda";
+    btnCancelar.className = "btn btn-outline-secondary";
+    btnCancelar.textContent = "Cancelar Edição";
+    btnCancelar.style.display = "none";
+    btnCancelar.addEventListener("click", () => this.cancelarEdicao());
+    btnSalvar.parentElement.appendChild(btnCancelar);
+
     this.atualizarTabela();
   }
 
@@ -37,7 +49,7 @@ class VendaController {
     msgDiv.innerHTML = `<div class="alert alert-${tipo} alert-dismissible fade show" role="alert">${texto}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>`;
     setTimeout(() => {
       msgDiv.innerHTML = "";
-    }, 3000);
+    }, 4000);
   }
 
   carregarSelectSessoes() {
@@ -96,10 +108,18 @@ class VendaController {
     );
 
     const lista = JSON.parse(localStorage.getItem("ingressos")) || [];
-    lista.push(ingresso);
+
     try {
-      localStorage.setItem("ingressos", JSON.stringify(lista));
-      this.mostrarMensagem("Ingresso vendido com sucesso!", "success");
+      if (this.editIndex !== null) {
+        lista[this.editIndex] = ingresso;
+        localStorage.setItem("ingressos", JSON.stringify(lista));
+        this.mostrarMensagem("Ingresso atualizado com sucesso!", "success");
+        this.cancelarEdicao();
+      } else {
+        lista.push(ingresso);
+        localStorage.setItem("ingressos", JSON.stringify(lista));
+        this.mostrarMensagem("Ingresso vendido com sucesso!", "success");
+      }
       document.getElementById("formVenda").reset();
       this.atualizarTabela();
     } catch (e) {
@@ -125,6 +145,7 @@ class VendaController {
       }
 
       const tr = document.createElement("tr");
+      if (this.editIndex === index) tr.classList.add("table-active");
       tr.innerHTML = `
         <td>${index + 1}</td>
         <td>${nomeSessao}</td>
@@ -132,13 +153,64 @@ class VendaController {
         <td>${ingresso.cpf}</td>
         <td>${ingresso.assento}</td>
         <td>${ingresso.tipoPagamento}</td>
-        <td><button class="btn btn-danger btn-sm" onclick="controller.excluir(${index})">Excluir</button></td>
+        <td>
+          <button class="btn btn-warning btn-sm me-1" onclick="controller.editar(${index})">Editar</button>
+          <button class="btn btn-danger btn-sm" onclick="controller.excluir(${index})">Excluir</button>
+        </td>
       `;
       tbody.appendChild(tr);
     });
   }
 
+  editar(index) {
+    const lista = JSON.parse(localStorage.getItem("ingressos")) || [];
+    const ingresso = lista[index];
+    if (!ingresso) return;
+
+    this.editIndex = index;
+
+    // Recarregar select de sessões
+    this.carregarSelectSessoes();
+
+    // Preencher o formulário
+    document.getElementById("selectSessao").value = ingresso.sessaoIndex;
+    document.getElementById("nomeCliente").value = ingresso.nomeCliente;
+    document.getElementById("cpf").value = ingresso.cpf;
+    document.getElementById("assento").value = ingresso.assento;
+    document.getElementById("tipoPagamento").value = ingresso.tipoPagamento;
+
+    const btnSalvar = document.getElementById("btnConfirmarVenda");
+    btnSalvar.textContent = "Atualizar Ingresso";
+    btnSalvar.classList.remove("btn-success");
+    btnSalvar.classList.add("btn-warning");
+
+    document.getElementById("btnCancelarVenda").style.display = "block";
+
+    this.atualizarTabela();
+
+    document.getElementById("formVenda").scrollIntoView({ behavior: "smooth", block: "center" });
+    document.getElementById("selectSessao").focus();
+  }
+
+  cancelarEdicao() {
+    this.editIndex = null;
+    document.getElementById("formVenda").reset();
+
+    const btnSalvar = document.getElementById("btnConfirmarVenda");
+    btnSalvar.textContent = "Confirmar Venda";
+    btnSalvar.classList.remove("btn-warning");
+    btnSalvar.classList.add("btn-success");
+
+    document.getElementById("btnCancelarVenda").style.display = "none";
+    this.atualizarTabela();
+  }
+
   excluir(index) {
+    if (this.editIndex !== null) {
+      this.mostrarMensagem("Cancele a edição antes de excluir.", "danger");
+      return;
+    }
+
     const confirmado = confirm('Tem certeza que deseja excluir este ingresso? Esta ação não pode ser desfeita.');
     if (!confirmado) return;
 

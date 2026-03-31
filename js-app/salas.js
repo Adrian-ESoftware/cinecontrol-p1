@@ -9,6 +9,7 @@ class Sala {
 class SalaController {
   constructor() {
     this.salas = [];
+    this.editIndex = null;
     this.init();
   }
 
@@ -16,6 +17,18 @@ class SalaController {
     document.getElementById("btnSalvarSala").addEventListener("click", () => {
       this.salvar();
     });
+
+    // Criar botão cancelar dinamicamente
+    const btnSalvar = document.getElementById("btnSalvarSala");
+    const btnCancelar = document.createElement("button");
+    btnCancelar.type = "button";
+    btnCancelar.id = "btnCancelarSala";
+    btnCancelar.className = "btn btn-outline-secondary";
+    btnCancelar.textContent = "Cancelar Edição";
+    btnCancelar.style.display = "none";
+    btnCancelar.addEventListener("click", () => this.cancelarEdicao());
+    btnSalvar.parentElement.appendChild(btnCancelar);
+
     this.atualizarTabela();
   }
 
@@ -38,12 +51,19 @@ class SalaController {
     }
 
     const sala = new Sala(nome, capacidade, tipo);
-
     const lista = JSON.parse(localStorage.getItem("salas")) || [];
-    lista.push(sala);
+
     try {
-      localStorage.setItem("salas", JSON.stringify(lista));
-      this.mostrarMensagem("Sala cadastrada com sucesso!", "success");
+      if (this.editIndex !== null) {
+        lista[this.editIndex] = sala;
+        localStorage.setItem("salas", JSON.stringify(lista));
+        this.mostrarMensagem("Sala atualizada com sucesso!", "success");
+        this.cancelarEdicao();
+      } else {
+        lista.push(sala);
+        localStorage.setItem("salas", JSON.stringify(lista));
+        this.mostrarMensagem("Sala cadastrada com sucesso!", "success");
+      }
       document.getElementById("formSala").reset();
       this.atualizarTabela();
     } catch (e) {
@@ -58,23 +78,67 @@ class SalaController {
 
     lista.forEach((sala, index) => {
       const tr = document.createElement("tr");
+      if (this.editIndex === index) tr.classList.add("table-active");
       tr.innerHTML = `
         <td>${index + 1}</td>
         <td>${sala.nome}</td>
         <td>${sala.capacidade}</td>
         <td>${sala.tipo}</td>
-        <td><button class="btn btn-danger btn-sm" onclick="controller.excluir(${index})">Excluir</button></td>
+        <td>
+          <button class="btn btn-warning btn-sm me-1" onclick="controller.editar(${index})">Editar</button>
+          <button class="btn btn-danger btn-sm" onclick="controller.excluir(${index})">Excluir</button>
+        </td>
       `;
       tbody.appendChild(tr);
     });
   }
 
+  editar(index) {
+    const lista = JSON.parse(localStorage.getItem("salas")) || [];
+    const sala = lista[index];
+    if (!sala) return;
+
+    this.editIndex = index;
+
+    document.getElementById("nomeSala").value = sala.nome;
+    document.getElementById("capacidade").value = sala.capacidade;
+    document.getElementById("tipoSala").value = sala.tipo;
+
+    const btnSalvar = document.getElementById("btnSalvarSala");
+    btnSalvar.textContent = "Atualizar Sala";
+    btnSalvar.classList.remove("btn-success");
+    btnSalvar.classList.add("btn-warning");
+
+    document.getElementById("btnCancelarSala").style.display = "block";
+
+    this.atualizarTabela();
+
+    document.getElementById("formSala").scrollIntoView({ behavior: "smooth", block: "center" });
+    document.getElementById("nomeSala").focus();
+  }
+
+  cancelarEdicao() {
+    this.editIndex = null;
+    document.getElementById("formSala").reset();
+
+    const btnSalvar = document.getElementById("btnSalvarSala");
+    btnSalvar.textContent = "Salvar Sala";
+    btnSalvar.classList.remove("btn-warning");
+    btnSalvar.classList.add("btn-success");
+
+    document.getElementById("btnCancelarSala").style.display = "none";
+    this.atualizarTabela();
+  }
+
   excluir(index) {
-    // Contar dependentes para informar o usuário
+    if (this.editIndex !== null) {
+      this.mostrarMensagem("Cancele a edição antes de excluir.", "danger");
+      return;
+    }
+
     const sessoes = JSON.parse(localStorage.getItem("sessoes")) || [];
     const ingressos = JSON.parse(localStorage.getItem("ingressos")) || [];
 
-    // Sessões que referenciam esta sala
     const sessoesRelacionadas = [];
     sessoes.forEach((sessao, i) => {
       if (sessao.salaIndex === index) {
@@ -82,7 +146,6 @@ class SalaController {
       }
     });
 
-    // Ingressos que referenciam as sessões relacionadas
     let ingressosRelacionados = 0;
     ingressos.forEach((ingresso) => {
       if (sessoesRelacionadas.includes(ingresso.sessaoIndex)) {
@@ -90,7 +153,6 @@ class SalaController {
       }
     });
 
-    // Montar mensagem de confirmação
     let msgConfirm = 'Tem certeza que deseja excluir esta sala?';
     if (sessoesRelacionadas.length > 0 || ingressosRelacionados > 0) {
       msgConfirm += '\n\n⚠️ EXCLUSÃO ENCADEADA: Serão removidos também:';
@@ -107,24 +169,20 @@ class SalaController {
     if (!confirmado) return;
 
     try {
-      // 1. Remover ingressos das sessões relacionadas
       let novaListaIngressos = ingressos.filter((ingresso) => {
         return !sessoesRelacionadas.includes(ingresso.sessaoIndex);
       });
 
-      // 2. Remover sessões relacionadas
       let novaListaSessoes = sessoes.filter((sessao) => {
         return sessao.salaIndex !== index;
       });
 
-      // 3. Reajustar salaIndex nas sessões restantes (índices acima do removido diminuem em 1)
       novaListaSessoes.forEach((sessao) => {
         if (sessao.salaIndex > index) {
           sessao.salaIndex--;
         }
       });
 
-      // 4. Reajustar sessaoIndex nos ingressos restantes
       const mapaIndicesSessoes = {};
       let novoIndiceSessao = 0;
       sessoes.forEach((sessao, i) => {
@@ -140,11 +198,9 @@ class SalaController {
         }
       });
 
-      // 5. Remover a sala
       const salas = JSON.parse(localStorage.getItem("salas")) || [];
       salas.splice(index, 1);
 
-      // 6. Salvar tudo no localStorage
       localStorage.setItem("salas", JSON.stringify(salas));
       localStorage.setItem("sessoes", JSON.stringify(novaListaSessoes));
       localStorage.setItem("ingressos", JSON.stringify(novaListaIngressos));
